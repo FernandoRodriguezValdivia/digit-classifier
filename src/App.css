@@ -1,0 +1,139 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 30px;
+  padding: 30px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+h1 {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+header p {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.main-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 50px;
+  margin-bottom: 40px;
+}
+
+.canvas-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.clear-btn {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: transform 0.2s;
+}
+
+.clear-btn:hover {
+  transform: scale(1.05);
+}
+
+.prediction-placeholder {
+  background: #f0f0f0;
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  color: #999;
+  font-size: 1.2rem;
+}
+
+.prediction-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  min-width: 250px;
+}
+
+.prediction-card h2 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.digit {
+  font-size: 8rem;
+  font-weight: bold;
+  margin: 20px 0;
+}
+
+.confidence-bar {
+  background: rgba(255,255,255,0.3);
+  border-radius: 10px;
+  height: 20px;
+  overflow: hidden;
+  margin: 15px 0;
+}
+
+.confidence-fill {
+  background: #4ade80;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+footer {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+  color: #666;
+}
+
+.small {
+  font-size: 0.8rem;
+  margin-top: 8px;
+  color: #999;
+}
+
+@media (max-width: 768px) {
+  .main-container {
+    flex-direction: column;
+    gap: 30px;
+  }
+  
+  h1 {
+    font-size: 1.8rem;
+  }
+  
+  .digit {
+    font-size: 5rem;
+  }
+}
