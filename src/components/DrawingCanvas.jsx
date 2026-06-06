@@ -18,33 +18,52 @@ const DrawingCanvas = ({ onPredict }) => {
     context.lineJoin = 'round';
   }, []);
 
-  const startDrawing = (e) => {
+  const getPositions = (e) => {
+    const rect = canvasRef.current.getBoundingClientRect();
+    return {
+      x: Math.round(e.clientX - rect.left),
+      y: Math.round(e.clientY - rect.top)
+    };
+  }
+
+  const onMouseDown = (e) => {
     setIsDrawing(true);
-    const { offsetX, offsetY } = e.nativeEvent;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    const { x, y } = getPositions(e);
+    const ctx = canvasRef.current.getContext('2d');
     ctx.beginPath();
-    ctx.moveTo(offsetX, offsetY);
-    ctx.lineTo(offsetX, offsetY);
+    ctx.moveTo(x, y);
+    ctx.lineTo(x, y);
     ctx.stroke();
-  };
+  }
 
-  const draw = (e) => {
+  const onMouseMove = (e) => {
     if (!isDrawing) return;
-    const { offsetX, offsetY } = e.nativeEvent;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    ctx.lineTo(offsetX, offsetY);
+    const { x, y } = getPositions(e);
+    const ctx = canvasRef.current.getContext('2d');
+    ctx.lineTo(x, y);
     ctx.stroke();
-  };
+  }
 
-  const stopDrawing = () => {
+  const onMouseUp = () => {
     if (!isDrawing) return;
     setIsDrawing(false);
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvasRef.current.getContext('2d');
     ctx.beginPath();
-  };
+  }
+
+  const ontouchstart = (evt) => {
+    const loc = evt.touches[0];
+    onMouseDown(loc);
+  }
+
+  const ontouchmove = (evt) => {
+    const loc = evt.touches[0];
+    onMouseMove(loc);
+  }
+
+  const ontouchend = () => {
+    onMouseUp();
+  }
 
   const clearCanvas = () => {
     const canvas = canvasRef.current;
@@ -68,7 +87,7 @@ const DrawingCanvas = ({ onPredict }) => {
     ctx.restore();
   };
 
-  const predict = async() => {
+  const predict = async () => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
@@ -89,7 +108,7 @@ const DrawingCanvas = ({ onPredict }) => {
         const b = data[i + 2];
 
         const brightness = (r + g + b) / 3;
-        
+
         if (r > 250 && g > 250 && b > 250) {
           if (x < minX) minX = x;
           if (x > maxX) maxX = x;
@@ -143,10 +162,13 @@ const DrawingCanvas = ({ onPredict }) => {
     <div className="canvas-container">
       <canvas
         ref={canvasRef}
-        onMouseDown={startDrawing}
-        onMouseMove={draw}
-        onMouseUp={stopDrawing}
-        onMouseLeave={stopDrawing}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseUp}
+        onTouchStart={ontouchstart}
+        onTouchMove={ontouchmove}
+        onTouchEnd={ontouchend}
         style={{
           border: '2px solid #667eea',
           borderRadius: '10px',
