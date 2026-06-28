@@ -30,7 +30,7 @@ jobs:
         run: npm install -g netlify-cli
       
       - name: Deploy to Netlify Preview
-        run: netlify deploy --dir=dist --site=$NETLIFY_SITE_ID --auth=$NETLIFY_AUTH_TOKEN --alias=pr-${{ github.event.pull_request.number }} --message="Preview for PR #${{ github.event.pull_request.number }}"
+        run: netlify deploy --dir=dist --site=$NETLIFY_SITE_ID --auth=$NETLIFY_AUTH_TOKEN --alias=pr-${{ github.event.pull_request.number }} --message="Preview for PR \#${{ github.event.pull_request.number }}"
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
