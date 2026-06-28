@@ -1,9 +1,5 @@
 import { useRef, useState } from "react";
-
-const PREDICT_INTERVAL = 500;
-const CANVAS_WIDTH = 280;
-const CANVAS_HEIGHT = 280;
-const LINE_WIDTH = 15;
+import { CANVAS_HEIGHT, CANVAS_WIDTH, LINE_WIDTH, PREDICT_INTERVAL } from "../constants";
 
 export const useDrawing = (onPredict) => {
   const canvasRef = useRef(null);
