@@ -1,14 +1,6 @@
 import { motion } from 'framer-motion';
 
 const Prediction = ({ prediction, confidence }) => {
-  if (prediction !==0 && !prediction) {
-    return (
-      <div className="prediction-placeholder">
-        ✍️ Dibuja un número en el canvas
-      </div>
-    );
-  }
-
   return (
     <motion.div 
       className="prediction-card"
