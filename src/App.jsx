@@ -34,7 +34,6 @@ function App() {
     if (!imageData || !model) return;
     try {
       const result = await predictDigit(model, imageData);
-      console.log('Predicción:', result);
       setPrediction(result.digit);
       setConfidence(result.confidence);
     } catch (error) {

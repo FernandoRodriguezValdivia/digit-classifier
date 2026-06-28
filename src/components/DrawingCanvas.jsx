@@ -3,6 +3,8 @@ import { useRef, useState, useEffect } from 'react';
 const DrawingCanvas = ({ onPredict }) => {
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const lastPredictTimeRef = useRef(0);
+  const PREDICT_INTERVAL = 500;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -36,19 +38,27 @@ const DrawingCanvas = ({ onPredict }) => {
     ctx.stroke();
   }
 
-  const onMouseMove = (e) => {
+  const onMouseMove = async(e) => {
     if (!isDrawing) return;
     const { x, y } = getPositions(e);
     const ctx = canvasRef.current.getContext('2d');
     ctx.lineTo(x, y);
     ctx.stroke();
+
+    const now = Date.now();
+    if (lastPredictTimeRef.current === 0 || now - lastPredictTimeRef.current > PREDICT_INTERVAL) {
+      await predict();
+      lastPredictTimeRef.current = now;
+    }
   }
 
-  const onMouseUp = () => {
+  const onMouseUp = async() => {
     if (!isDrawing) return;
     setIsDrawing(false);
     const ctx = canvasRef.current.getContext('2d');
     ctx.beginPath();
+
+    await predict();
   }
 
   const ontouchstart = (evt) => {
@@ -118,7 +128,10 @@ const DrawingCanvas = ({ onPredict }) => {
       }
     }
 
-    if (maxX <= minX || maxY <= minY) return;
+    if (maxX <= minX || maxY <= minY) {
+      onPredict(null);
+      return;
+    };
 
     const width = maxX - minX;
     const height = maxY - minY;
@@ -140,7 +153,7 @@ const DrawingCanvas = ({ onPredict }) => {
     const srcX = minX - paddingX;
     const srcY = minY - paddingY;
 
-    drawCropSquare(srcX, srcY, size);
+    // drawCropSquare(srcX, srcY, size);
 
     tmpCtx.drawImage(
       canvas,
@@ -154,8 +167,8 @@ const DrawingCanvas = ({ onPredict }) => {
       28
     );
 
-    const imageData28 = tmpCanvas.toDataURL();
-    await onPredict(imageData28);
+    const imageData1 = tmpCtx.getImageData(0, 0, 28, 28);
+    await onPredict(imageData1);
   };
 
   return (
@@ -182,9 +195,9 @@ const DrawingCanvas = ({ onPredict }) => {
       <button onClick={clearCanvas} className="clear-btn">
         🧹 Limpiar
       </button>
-      <button onClick={predict} className="predict-btn">
+      {/* <button onClick={predict} className="predict-btn">
         🔍 Predecir
-      </button>
+      </button> */}
     </div>
   );
 };

@@ -16,7 +16,7 @@ export async function loadModel() {
     warmupPrediction.dispose();
     dummyTensor.dispose();
     console.log("Modelo listo con presicion 98.54%");
-    // console.log(model.outputShape); // Debug: verificar que la salida es [null, 10]
+    // console.log(model.outputShape);
     return model;
   } catch (error) {
     console.error('❌ Error cargando el modelo:', error);
@@ -26,53 +26,80 @@ export async function loadModel() {
 
 export async function predictDigit(model, imageData) {
   return new Promise((resolve, reject) => {
-    const img = new Image();
-
-    img.onload = async () => {
-      try {
-        const { predictions, minVal, maxVal } = tf.tidy(() => {
-          let tensor = tf.browser.fromPixels(img, 1); // Convertir imagen a tenso
-
-          tensor = tensor.toFloat().div(255.0); // Normalizar
-
-          // Añadir dimensión de lote para que sea [1, 28, 28, 1]
-          const batchTensor = tensor.expandDims(0);
-
-          // Extraemos los valores min y max
-          const minVal = batchTensor.min().dataSync()[0];
-          const maxVal = batchTensor.max().dataSync()[0];
-
-          // Ejecutar la predicción dentro del entorno controlado
-          const predictions = model.predict(batchTensor);
-
-          // Retornamos el tensor de predicciones y las métricas de depuración
-          // tf.tidy mantendrá vivo 'predictions' pero destruirá 'tensor' y 'batchTensor'
-          return { predictions, minVal, maxVal };
-        });
-
-        // Descargar los datos de la predicción de la GPU a la CPU de forma asíncrona
-        const probabilitiesArray = await predictions.data();
-
-        // Liberamos el último tensor que quedó vivo (las predicciones)
-        predictions.dispose();
-
-        // Encontrar el dígito con mayor probabilidad
-        const predictedDigit = probabilitiesArray.reduce(
-          (maxIdx, currentVal, currentIdx, arr) => 
-            currentVal > arr[maxIdx] ? currentIdx : maxIdx, 0
-        );
-        const maxProb = probabilitiesArray[predictedDigit];
-
-        resolve({ digit: predictedDigit, confidence: maxProb });
-      } catch (err) {
-        reject(err);
-      }
-    };
-
-    img.onerror = reject;
-    img.src = imageData;
+    try {
+      // Usar tf.tidy para gestión automática de memoria
+      const result = tf.tidy(() => {
+        const tensor = tf.browser.fromPixels(imageData, 1);
+        
+        const normalized = tensor.toFloat().div(255.0);
+        
+        const batchTensor = normalized.expandDims(0);
+        
+        const predictions = model.predict(batchTensor);
+        
+        const probs = predictions.dataSync();
+        
+        let maxIdx = 0;
+        let maxProb = probs[0];
+        for (let i = 1; i < probs.length; i++) {
+          if (probs[i] > maxProb) {
+            maxProb = probs[i];
+            maxIdx = i;
+          }
+        }
+        
+        return { digit: maxIdx, confidence: maxProb };
+      });
+      
+      resolve(result);
+    } catch (err) {
+      reject(err);
+    }
   });
 }
+
+
+// export async function predictDigit(model, imageData) {
+//   return new Promise((resolve, reject) => {
+//     const img = new Image();
+
+//     img.onload = async () => {
+//       try {
+//         const { predictions, minVal, maxVal } = tf.tidy(() => {
+//           let tensor = tf.browser.fromPixels(img, 1);
+
+//           tensor = tensor.toFloat().div(255.0);
+
+//           const batchTensor = tensor.expandDims(0);
+
+//           const minVal = batchTensor.min().dataSync()[0];
+//           const maxVal = batchTensor.max().dataSync()[0];
+
+//           const predictions = model.predict(batchTensor);
+
+//           return { predictions, minVal, maxVal };
+//         });
+
+//         const probabilitiesArray = await predictions.data();
+
+//         predictions.dispose();
+
+//         const predictedDigit = probabilitiesArray.reduce(
+//           (maxIdx, currentVal, currentIdx, arr) => 
+//             currentVal > arr[maxIdx] ? currentIdx : maxIdx, 0
+//         );
+//         const maxProb = probabilitiesArray[predictedDigit];
+
+//         resolve({ digit: predictedDigit, confidence: maxProb });
+//       } catch (err) {
+//         reject(err);
+//       }
+//     };
+
+//     img.onerror = reject;
+//     img.src = imageData;
+//   });
+// }
 
 // versión anterior sin tf.tidy ni optimizaciones de memoria
 // export async function predictDigit(model, imageData) {
@@ -81,7 +108,7 @@ export async function predictDigit(model, imageData) {
 
 //     img.onload = async () => {
 //       try {
-//         let tensor = tf.browser.fromPixels(img, 1); // grayscale directo
+//         let tensor = tf.browser.fromPixels(img, 1);
 
 //         tensor = tf.image.resizeBilinear(tensor, [28, 28]);
 
