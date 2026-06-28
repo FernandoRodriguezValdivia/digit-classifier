@@ -1,5 +1,4 @@
 .button {
-  background: #ff6b6b;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -11,4 +10,17 @@
 
 .button:hover {
   transform: scale(1.05);
+}
+
+.button.primary {
+  background-color: #ff6b6b;
+}
+
+.button.secondary {
+  background-color: #718096;
+}
+
+.button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

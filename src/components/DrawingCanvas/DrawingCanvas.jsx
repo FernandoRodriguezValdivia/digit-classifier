@@ -85,20 +85,6 @@ const DrawingCanvas = ({ onPredict }) => {
     onPredict(null);
   };
 
-  const drawCropSquare = (srcX, srcY, size) => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-
-    ctx.save();
-
-    ctx.strokeStyle = "lime";
-    ctx.lineWidth = 2;
-
-    ctx.strokeRect(srcX, srcY, size, size);
-
-    ctx.restore();
-  };
-
   const predict = async () => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
