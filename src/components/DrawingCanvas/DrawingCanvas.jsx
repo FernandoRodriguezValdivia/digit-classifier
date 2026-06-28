@@ -1,4 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
+import styles from './DrawingCanvas.module.css'
+import Button from '../Button/Button';
 
 const DrawingCanvas = ({ onPredict }) => {
   const canvasRef = useRef(null);
@@ -38,7 +40,7 @@ const DrawingCanvas = ({ onPredict }) => {
     ctx.stroke();
   }
 
-  const onMouseMove = async(e) => {
+  const onMouseMove = async (e) => {
     if (!isDrawing) return;
     const { x, y } = getPositions(e);
     const ctx = canvasRef.current.getContext('2d');
@@ -52,7 +54,7 @@ const DrawingCanvas = ({ onPredict }) => {
     }
   }
 
-  const onMouseUp = async() => {
+  const onMouseUp = async () => {
     if (!isDrawing) return;
     setIsDrawing(false);
     const ctx = canvasRef.current.getContext('2d');
@@ -172,7 +174,7 @@ const DrawingCanvas = ({ onPredict }) => {
   };
 
   return (
-    <div className="canvas-container">
+    <div className={styles.container}>
       <canvas
         ref={canvasRef}
         onMouseDown={onMouseDown}
@@ -192,12 +194,9 @@ const DrawingCanvas = ({ onPredict }) => {
           touchAction: 'none'
         }}
       />
-      <button onClick={clearCanvas} className="clear-btn">
+      <Button onClick={clearCanvas}>
         🧹 Limpiar
-      </button>
-      {/* <button onClick={predict} className="predict-btn">
-        🔍 Predecir
-      </button> */}
+      </Button>
     </div>
   );
 };
