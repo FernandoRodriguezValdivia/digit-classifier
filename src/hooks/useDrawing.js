@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { CANVAS_HEIGHT, CANVAS_WIDTH, LINE_WIDTH, PREDICT_INTERVAL } from "../constants";
 
 export const useDrawing = (onPredict) => {
@@ -24,13 +24,13 @@ export const useDrawing = (onPredict) => {
     context.lineJoin = 'round';
   }
 
-  const getPositions = (e) => {
+  const getPositions = useCallback((e) => {
     const rect = canvasRef.current.getBoundingClientRect();
     return {
       x: Math.round(e.clientX - rect.left),
       y: Math.round(e.clientY - rect.top)
     };
-  }
+  }, [])
 
   const startDrawing = (e) => {
     setIsDrawing(true);
@@ -42,7 +42,7 @@ export const useDrawing = (onPredict) => {
     ctx.stroke();
   }
 
-  const draw = async (e) => {
+  const draw = useCallback(async (e) => {
     if (!isDrawing) return;
     const { x, y } = getPositions(e);
     const ctx = canvasRef.current.getContext('2d');
@@ -54,15 +54,15 @@ export const useDrawing = (onPredict) => {
       await onPredict();
       lastPredictTimeRef.current = now;
     }
-  }
+  }, [isDrawing, getPositions, onPredict])
 
-  const stopDrawing = async () => {
+  const stopDrawing = useCallback(async () => {
     if (!isDrawing) return;
     setIsDrawing(false);
     const ctx = canvasRef.current.getContext('2d');
     ctx.beginPath();
     await onPredict();
-  }
+  }, [isDrawing, onPredict])
 
   const clearCanvas = async () => {
     const canvas = canvasRef.current;
@@ -72,23 +72,23 @@ export const useDrawing = (onPredict) => {
     await onPredict(null);
   };
 
-  const getEventCoordinates = (e) => {
+  const getEventCoordinates = useCallback((e) => {
     if (e.touches) {
       return e.touches[0]
     }
 
     return e;
-  }
+  }, [])
 
   const handleMouseDown = (e) => {
     const coords = getEventCoordinates(e)
     startDrawing(coords)
   }
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = useCallback((e) => {
     const coords = getEventCoordinates(e);
     draw(coords);
-  }
+  }, [draw])
 
   const handleMouseUp = () => {
     stopDrawing();

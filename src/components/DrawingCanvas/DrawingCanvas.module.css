@@ -4,3 +4,17 @@
   align-items: center;
   gap: 15px;
 }
+
+.canvas {
+  border: 2px solid #667eea;
+  border-radius: 10px;
+  cursor: crosshair;
+  background-color: black;
+  width: 280px;
+  height: 280px;
+  touch-action: none
+}
+
+.canvas:hover {
+  border-color: #5a67d8;
+}

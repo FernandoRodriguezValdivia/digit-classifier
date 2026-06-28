@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ModelService } from "../core/services/ModelService";
 
 export const useModel = () => {
@@ -23,7 +23,7 @@ export const useModel = () => {
     }
   }
 
-  const onPredict = async (canvas) => {
+  const onPredict = useCallback(async (canvas) => {
     if (canvas === null) {
       setPrediction(null);
       setConfidence(0);
@@ -40,7 +40,7 @@ export const useModel = () => {
       setError(error.message);
       throw error;
     }
-  };
+  }, []);
 
   useEffect(() => {
     return () => {
