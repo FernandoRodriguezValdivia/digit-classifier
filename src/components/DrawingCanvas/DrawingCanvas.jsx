@@ -1,90 +1,9 @@
 import { useRef, useState, useEffect } from 'react';
 import styles from './DrawingCanvas.module.css'
 import Button from '../Button/Button';
+import { useDrawing } from '../../hooks/useDrawing';
 
 const DrawingCanvas = ({ onPredict }) => {
-  const canvasRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const lastPredictTimeRef = useRef(0);
-  const PREDICT_INTERVAL = 500;
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-
-    canvas.width = 280;
-    canvas.height = 280;
-    context.fillStyle = 'black';
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.strokeStyle = 'white';
-    context.lineWidth = 15;
-    context.lineCap = 'round';
-    context.lineJoin = 'round';
-  }, []);
-
-  const getPositions = (e) => {
-    const rect = canvasRef.current.getBoundingClientRect();
-    return {
-      x: Math.round(e.clientX - rect.left),
-      y: Math.round(e.clientY - rect.top)
-    };
-  }
-
-  const onMouseDown = (e) => {
-    setIsDrawing(true);
-    const { x, y } = getPositions(e);
-    const ctx = canvasRef.current.getContext('2d');
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-  }
-
-  const onMouseMove = async (e) => {
-    if (!isDrawing) return;
-    const { x, y } = getPositions(e);
-    const ctx = canvasRef.current.getContext('2d');
-    ctx.lineTo(x, y);
-    ctx.stroke();
-
-    const now = Date.now();
-    if (lastPredictTimeRef.current === 0 || now - lastPredictTimeRef.current > PREDICT_INTERVAL) {
-      await predict();
-      lastPredictTimeRef.current = now;
-    }
-  }
-
-  const onMouseUp = async () => {
-    if (!isDrawing) return;
-    setIsDrawing(false);
-    const ctx = canvasRef.current.getContext('2d');
-    ctx.beginPath();
-
-    await predict();
-  }
-
-  const ontouchstart = (evt) => {
-    const loc = evt.touches[0];
-    onMouseDown(loc);
-  }
-
-  const ontouchmove = (evt) => {
-    const loc = evt.touches[0];
-    onMouseMove(loc);
-  }
-
-  const ontouchend = () => {
-    onMouseUp();
-  }
-
-  const clearCanvas = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-    onPredict(null);
-  };
-
   const predict = async () => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -159,17 +78,24 @@ const DrawingCanvas = ({ onPredict }) => {
     await onPredict(imageData1);
   };
 
+  const { canvasRef, initCanvas, handleMouseDown, handleMouseMove, handleMouseUp, clearCanvas } =
+    useDrawing(predict);
+
+  useEffect(() => {
+    initCanvas();
+  }, []);
+
   return (
     <div className={styles.container}>
       <canvas
         ref={canvasRef}
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-        onMouseLeave={onMouseUp}
-        onTouchStart={ontouchstart}
-        onTouchMove={ontouchmove}
-        onTouchEnd={ontouchend}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleMouseDown}
+        onTouchMove={handleMouseMove}
+        onTouchEnd={handleMouseUp}
         style={{
           border: '2px solid #667eea',
           borderRadius: '10px',
