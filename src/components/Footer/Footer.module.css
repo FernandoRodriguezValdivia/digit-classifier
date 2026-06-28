@@ -1,0 +1,58 @@
+.footer {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+  color: #666;
+}
+
+.small {
+  font-size: 0.8rem;
+  margin-top: 8px;
+  color: #999;
+}
+
+.project {
+  margin-top: 3rem;
+  padding: 1.5rem;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 0 0 20px 20px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.repoLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #24292e;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.repoLink:hover {
+  background: #3a3f44;
+  transform: translateY(-2px);
+}
+
+.githubIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.note {
+  font-size: 0.75rem;
+  color: #888;
+  margin: 0;
+}

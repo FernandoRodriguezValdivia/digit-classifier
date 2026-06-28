@@ -1,0 +1,26 @@
+.button {
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: transform 0.2s;
+}
+
+.button:hover {
+  transform: scale(1.05);
+}
+
+.button.primary {
+  background-color: #ff6b6b;
+}
+
+.button.secondary {
+  background-color: #718096;
+}
+
+.button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
