@@ -4,7 +4,7 @@
  */
 import styles from './Footer.module.css'
 
-const Footer = () => {
+const Footer = (): React.JSX.Element => {
   return (
     <footer className={styles.footer}>
       <p>🧠 Red neuronal entrenada con el dataset MNIST | TensorFlow.js</p>
