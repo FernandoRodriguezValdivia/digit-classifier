@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import styles from './Prediction.module.css'
+import { PredictionProps } from '../../types/prediction.types';
 
-const Prediction = ({ prediction, confidence }) => {
+const Prediction = ({ prediction, confidence }: PredictionProps): React.JSX.Element => {
   return (
     <motion.div
       className={styles.container}

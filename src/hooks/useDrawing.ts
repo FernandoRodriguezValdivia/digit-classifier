@@ -1,12 +1,14 @@
 import { useCallback, useRef, useState } from "react";
 import { CANVAS_HEIGHT, CANVAS_WIDTH, LINE_WIDTH, PREDICT_INTERVAL } from "../constants";
+import { Client, Position } from "../types/drawing.types";
+import { MouseOrTouchEvent, UseDrawingReturn } from "../types/hook.types";
 
-export const useDrawing = (onPredict) => {
-  const canvasRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const lastPredictTimeRef = useRef(0);
+export const useDrawing = (onPredict: () => Promise<void>): UseDrawingReturn => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDrawing, setIsDrawing] = useState<boolean>(false);
+  const lastPredictTimeRef = useRef<number>(0);
 
-  const initCanvas = () => {
+  const initCanvas = (): void => {
     const canvas = canvasRef.current;
 
     if (!canvas) return;
@@ -16,6 +18,8 @@ export const useDrawing = (onPredict) => {
 
     const context = canvas.getContext('2d');
 
+    if (!context) return;
+
     context.fillStyle = 'black';
     context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     context.strokeStyle = 'white';
@@ -24,28 +28,31 @@ export const useDrawing = (onPredict) => {
     context.lineJoin = 'round';
   }
 
-  const getPositions = useCallback((e) => {
-    const rect = canvasRef.current.getBoundingClientRect();
+  const getPositions = useCallback((e: Client): Position => {
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return { x: 0, y: 0 }
     return {
       x: Math.round(e.clientX - rect.left),
       y: Math.round(e.clientY - rect.top)
     };
   }, [])
 
-  const startDrawing = (e) => {
+  const startDrawing = (e: Client): void => {
     setIsDrawing(true);
     const { x, y } = getPositions(e);
-    const ctx = canvasRef.current.getContext('2d');
+    const ctx = canvasRef.current?.getContext('2d');
+    if (!ctx) return;
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x, y);
     ctx.stroke();
   }
 
-  const draw = useCallback(async (e) => {
+  const draw = useCallback(async (e: Client): Promise<void> => {
     if (!isDrawing) return;
     const { x, y } = getPositions(e);
-    const ctx = canvasRef.current.getContext('2d');
+    const ctx = canvasRef.current?.getContext('2d');
+    if (!ctx) return;
     ctx.lineTo(x, y);
     ctx.stroke();
 
@@ -56,36 +63,38 @@ export const useDrawing = (onPredict) => {
     }
   }, [isDrawing, getPositions, onPredict])
 
-  const stopDrawing = useCallback(async () => {
+  const stopDrawing = useCallback(async (): Promise<void> => {
     if (!isDrawing) return;
     setIsDrawing(false);
-    const ctx = canvasRef.current.getContext('2d');
+    const ctx = canvasRef.current?.getContext('2d');
+    if (!ctx) return;
     ctx.beginPath();
     await onPredict();
   }, [isDrawing, onPredict])
 
-  const clearCanvas = async () => {
+  const clearCanvas = async (): Promise<void> => {
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas?.getContext('2d');
+    if (!ctx) return;
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    await onPredict(null);
+    await onPredict();
   };
 
-  const getEventCoordinates = useCallback((e) => {
-    if (e.touches) {
-      return e.touches[0]
+  const getEventCoordinates = useCallback((e: MouseOrTouchEvent): Client => {
+    if ('touches' in e) {
+      return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
     }
 
-    return e;
+    return { clientX: e.clientX, clientY: e.clientY };
   }, [])
 
-  const handleMouseDown = (e) => {
+  const handleMouseDown = (e: MouseOrTouchEvent) => {
     const coords = getEventCoordinates(e)
     startDrawing(coords)
   }
 
-  const handleMouseMove = useCallback((e) => {
+  const handleMouseMove = useCallback((e: MouseOrTouchEvent) => {
     const coords = getEventCoordinates(e);
     draw(coords);
   }, [draw])

@@ -35,7 +35,7 @@ Puedes probar la aplicación aquí: **[https://digit-classifier-test.netlify.app
 
 | Área | Tecnologías |
 | :--- | :--- |
-| **Frontend** | React, Vite |
+| **Frontend** | React, TypeScript, Vite |
 | **Machine Learning** | TensorFlow.js (WebGL backend) |
 | **CI/CD** | GitHub Actions + Netlify |
 | **Control de versiones** | Git + GitHub |

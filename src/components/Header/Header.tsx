@@ -1,6 +1,6 @@
 import styles from './Header.module.css'
 
-const Header = () => {
+const Header = (): React.JSX.Element => {
   return (
     <header className={styles.container}>
       <h1 className={styles.title}>🔢 Clasificador de Dígitos</h1>

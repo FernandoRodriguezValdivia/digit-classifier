@@ -1,13 +1,14 @@
 import * as tf from '@tensorflow/tfjs';
 import { CANVAS_HEIGHT, CANVAS_WIDTH, MODEL_INPUT_HEIGHT, MODEL_INPUT_WIDTH } from '../constants';
+import { BoundingBox } from '../types/model.types';
 
-export const extractDigitBoundingBox = (imageData) => {
+export const extractDigitBoundingBox = (imageData: ImageData): BoundingBox => {
   const data = imageData.data;
 
-  let minX = CANVAS_WIDTH;
-  let minY = CANVAS_HEIGHT;
-  let maxX = 0;
-  let maxY = 0;
+  let minX: number = CANVAS_WIDTH;
+  let minY: number = CANVAS_HEIGHT;
+  let maxX: number = 0;
+  let maxY: number = 0;
 
   for (let y = 0; y < CANVAS_HEIGHT; y++) {
     for (let x = 0; x < CANVAS_WIDTH; x++) {
@@ -16,8 +17,6 @@ export const extractDigitBoundingBox = (imageData) => {
       const r = data[i];
       const g = data[i + 1];
       const b = data[i + 2];
-
-      const brightness = (r + g + b) / 3;
 
       if (r > 250 && g > 250 && b > 250) {
         if (x < minX) minX = x;
@@ -31,7 +30,7 @@ export const extractDigitBoundingBox = (imageData) => {
   return { minX, minY, maxX, maxY };
 }
 
-export const cropAndResizeDigit = (canvas, { minX, minY, maxX, maxY }) => {
+export const cropAndResizeDigit = (canvas: HTMLCanvasElement, { minX, minY, maxX, maxY }: BoundingBox): (ImageData | null) => {
   const width = maxX - minX;
   const height = maxY - minY;
 
@@ -42,6 +41,7 @@ export const cropAndResizeDigit = (canvas, { minX, minY, maxX, maxY }) => {
   tmpCanvas.height = 28;
 
   const tmpCtx = tmpCanvas.getContext("2d");
+  if (!tmpCtx) return null;
 
   tmpCtx.fillStyle = "black";
   tmpCtx.fillRect(0, 0, MODEL_INPUT_WIDTH, MODEL_INPUT_HEIGHT);
@@ -67,8 +67,9 @@ export const cropAndResizeDigit = (canvas, { minX, minY, maxX, maxY }) => {
   return tmpCtx.getImageData(0, 0, MODEL_INPUT_WIDTH, MODEL_INPUT_HEIGHT);;
 }
 
-export const preProcessCanvas = (canvas) => {
+export const preProcessCanvas = (canvas: HTMLCanvasElement): (ImageData | null) => {
   const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
 
   const imageData = ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
   const boundingBox = extractDigitBoundingBox(imageData)
@@ -80,9 +81,9 @@ export const preProcessCanvas = (canvas) => {
   return cropAndResizeDigit(canvas, boundingBox)
 }
 
-export const preprocessImage = (canvas) => {
+export const preprocessImage = (image: ImageData): tf.Tensor<tf.Rank> => {
   return tf.tidy(() => {
-    const tensor = tf.browser.fromPixels(canvas, 1);
+    const tensor = tf.browser.fromPixels(image, 1);
     const normalized = tensor.toFloat().div(255.0);
     const batchTensor = normalized.expandDims(0);
     return batchTensor;

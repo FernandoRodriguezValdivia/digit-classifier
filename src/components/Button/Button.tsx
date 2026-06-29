@@ -1,6 +1,8 @@
+import { PropsWithChildren } from 'react';
 import styles from './Button.module.css'
+import { ButtonProps } from '../../types/button.types';
 
-const Button = ({ children, variant = 'primary', onClick, disabled }) => {
+const Button = ({ children, variant = 'primary', onClick, disabled = false }: PropsWithChildren<ButtonProps>) => {
   const className = [
     styles.button,
     styles[variant],

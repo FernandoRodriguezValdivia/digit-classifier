@@ -1,7 +1,13 @@
 import * as tf from '@tensorflow/tfjs';
 import { preprocessImage } from '../../utils/imagePreprocessor';
+import { IModelService, ModelStatus, PredictionResult } from '../../types/model.types';
 
-export class ModelService {
+export class ModelService implements IModelService {
+  model: tf.LayersModel | null = null;
+  status: ModelStatus = 'idle';
+  error: string | null = null;
+  private readonly MODEL_URL: string = '/tfjs_model/model.json';
+
   constructor() {
     this.model = null;
     this.status = 'idle';
@@ -16,27 +22,27 @@ export class ModelService {
       this.status = 'loading';
       this.model = await tf.loadLayersModel(this.MODEL_URL);
       const dummyTensor = tf.zeros([1, 28, 28, 1]);
-      const warmupPrediction = this.model.predict(dummyTensor);
+      const warmupPrediction = this.model.predict(dummyTensor) as tf.Tensor;
       await warmupPrediction.data();
       warmupPrediction.dispose();
       dummyTensor.dispose();
       this.status = 'ready';
-      console.log('ready')
     } catch (e) {
       this.status = 'error';
-      this.error = e.message;
-      throw new Error(`Failed to load model: ${e.message}`);
+      this.error = e instanceof Error ? e.message : 'Error desconocido';
+      throw new Error(`Failed to load model: ${this.error}`);
     }
   }
 
-  predict(canvas) {
-    if (!this.model || this.status !== 'ready') {
+  predict(canvas: ImageData): PredictionResult {
+    const model = this.model;
+    if (!model || this.status !== 'ready') {
       throw new Error('Model is not ready');
     }
 
     return tf.tidy(() => {
       const tensor = preprocessImage(canvas);
-      const predictions = this.model.predict(tensor);
+      const predictions = model.predict(tensor) as tf.Tensor;
       const probs = predictions.dataSync();
 
       let maxIdx = 0;
@@ -52,11 +58,11 @@ export class ModelService {
     })
   }
 
-  getStatus() {
+  getStatus(): ModelStatus {
     return this.status;
   }
 
-  dispose() {
+  dispose(): void {
     if (this.model) {
       this.model.dispose();
       this.model = null;
