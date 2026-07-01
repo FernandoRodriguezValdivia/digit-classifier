@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import DrawingCanvas from './components/DrawingCanvas/DrawingCanvas';
 import Prediction from './components/Prediction/Prediction';
 import Footer from './components/Footer/Footer';
@@ -9,14 +8,27 @@ import './App.css';
 
 
 function App() {
-  const { loadModel, onPredict, status, error, prediction, confidence } = useModel();
+  const { loadModel, onPredict, status, prediction, confidence, type } = useModel();
 
   return (
     <div className="app">
       <Header />
-      <Button onClick={loadModel} disabled={status === 'loading' || status === 'ready'}>
-        {status === 'loading' ? 'Cargando modelo...' : status === 'ready' ? 'Modelo Cargado' : 'Cargar modelo'}
-      </Button>
+      <div className="button-status-container">
+        {
+          status === 'ready' ? <p className="status">Modelo cargado por {type}.</p> :
+            <>
+              <Button onClick={loadModel('default')} disabled={status === 'loading'}>
+                {status === 'loading' ? 'Cargando modelo...' : 'Cargar modelo'}
+              </Button>
+              <Button onClick={loadModel('worker')} disabled={status === 'loading'}>
+                {status === 'loading' ? 'Cargando modelo...' : 'Cargar modelo con Worker'}
+              </Button>
+            </>
+        }
+      </div>
+      {
+
+      }
       <div className="main-container">
         <DrawingCanvas onPredict={onPredict} />
         <Prediction prediction={prediction} confidence={confidence} />
